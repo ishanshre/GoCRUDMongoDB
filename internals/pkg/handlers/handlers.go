@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// creatng a handler interface
 type Handlers interface {
 	GetProducts(w http.ResponseWriter, r *http.Request)
 	CreateProduct(w http.ResponseWriter, r *http.Request)
@@ -23,16 +24,20 @@ type Handlers interface {
 	UpdateProduct(w http.ResponseWriter, r *http.Request)
 }
 
+// creating a type that imlements the handler interface
 type handler struct {
 	MG repository.DbMethod
 }
 
+// creating a constructor
 func NewHandler(mg connections.DbInterface) Handlers {
 	return &handler{
+		// calling repository constructor
 		MG: dbrepos.NewMongoDbRepo(mg, context.Background()),
 	}
 }
 
+// Retrives all the products and send it as response to user
 func (h *handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil {
@@ -50,6 +55,7 @@ func (h *handler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	helpers.StatusOKAll(w, limit, page, products)
 }
 
+// Insert product to database
 func (h *handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	p := &models.CreateUpdateProduct{}
 	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
@@ -64,6 +70,7 @@ func (h *handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	helpers.StatusCreated(w, product)
 }
 
+// get a specific product
 func (h *handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	idString := chi.URLParam(r, "id")
 	id, err := primitive.ObjectIDFromHex(idString)
@@ -79,6 +86,7 @@ func (h *handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	helpers.StatusOK(w, product)
 }
 
+// delete a product using id
 func (h *handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	idString := chi.URLParam(r, "id")
 	id, err := primitive.ObjectIDFromHex(idString)
@@ -93,6 +101,7 @@ func (h *handler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	helpers.StatusAcceptedMsg(w, "product deleted")
 }
 
+// update a product using id
 func (h *handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	idString := chi.URLParam(r, "id")
 	id, err := primitive.ObjectIDFromHex(idString)

@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	// populating fields with flag and default value
 	dsn := flag.String("dsn", "mongodb://localhost:27017", "URL for mongo db")
 	port := flag.Int("port", 8000, "Port that server listen to")
 	addr := fmt.Sprintf(":%d", *port)
@@ -34,7 +35,7 @@ func main() {
 		Addr:    addr,
 		Handler: router,
 	}
-
+	// starting the server
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err.Error())
 	}

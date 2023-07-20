@@ -9,8 +9,12 @@ import (
 	"github.com/ishanshre/GoCRUDMongoDB/internals/pkg/handlers"
 )
 
+// Returns the handler
 func Router(h handlers.Handlers) http.Handler {
+	// Create a new router
 	mux := chi.NewRouter()
+
+	// use cors middleware
 	mux.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -19,8 +23,11 @@ func Router(h handlers.Handlers) http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+
+	// use logger middleware
 	mux.Use(middleware.Logger)
 
+	// defining api path
 	mux.Get("/products", h.GetProducts)
 	mux.Post("/products", h.CreateProduct)
 	mux.Get("/products/{id}", h.GetProduct)
