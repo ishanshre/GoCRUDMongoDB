@@ -2,6 +2,7 @@ package dbrepos
 
 import (
 	"context"
+	"time"
 
 	"github.com/ishanshre/GoCRUDMongoDB/internals/pkg/connections"
 	"github.com/ishanshre/GoCRUDMongoDB/internals/pkg/repository"
@@ -18,3 +19,5 @@ func NewMongoDbRepo(client connections.DbInterface, ctx context.Context) reposit
 		ctx:    ctx,
 	}
 }
+
+const timeout = 3 * time.Second
