@@ -21,5 +21,11 @@ func Router(h handlers.Handlers) http.Handler {
 	}))
 	mux.Use(middleware.Logger)
 
+	mux.Get("/products", h.GetProducts)
+	mux.Post("/products", h.CreateProduct)
+	mux.Get("/products/{id}", h.GetProduct)
+	mux.Delete("/products/{id}", h.DeleteProduct)
+	mux.Put("/products/{id}", h.UpdateProduct)
+
 	return mux
 }

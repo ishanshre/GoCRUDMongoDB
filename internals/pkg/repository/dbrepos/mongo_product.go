@@ -7,10 +7,11 @@ import (
 	"github.com/ishanshre/GoCRUDMongoDB/internals/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (m *mongoDbRepo) CreateProduct(p *models.Product) (*models.Product, error) {
+func (m *mongoDbRepo) CreateProduct(p *models.CreateUpdateProduct) (*models.Product, error) {
 	ctx, cancel := context.WithTimeout(m.ctx, timeout)
 	defer cancel()
 
@@ -18,9 +19,8 @@ func (m *mongoDbRepo) CreateProduct(p *models.Product) (*models.Product, error) 
 	if err != nil {
 		return nil, errors.New("error in inserting product")
 	}
-
-	p.ID = res.InsertedID.(primitive.ObjectID)
-	return p, nil
+	prodct, _ := m.GetProduct(res.InsertedID.(primitive.ObjectID))
+	return prodct, nil
 }
 
 func (m *mongoDbRepo) GetProducts(limit, page int) ([]*models.Product, error) {
@@ -63,6 +63,9 @@ func (m *mongoDbRepo) GetProduct(id primitive.ObjectID) (*models.Product, error)
 	res := m.Client.GetProductCollection().FindOne(ctx, bson.M{"_id": id})
 	product := &models.Product{}
 	if err := res.Decode(&product); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("product not found")
+		}
 		return nil, errors.New("error in fetching product")
 	}
 	return product, nil
@@ -82,13 +85,13 @@ func (m *mongoDbRepo) DeleteProduct(id primitive.ObjectID) error {
 	return nil
 }
 
-func (m *mongoDbRepo) UpdateProduct(id primitive.ObjectID, update *models.Product) error {
+func (m *mongoDbRepo) UpdateProduct(id primitive.ObjectID, update *models.CreateUpdateProduct) error {
 	ctx, cancel := context.WithTimeout(m.ctx, timeout)
 	defer cancel()
-
-	_, err := m.Client.GetProductCollection().UpdateOne(ctx, bson.M{"_id": id}, update)
+	updateQuery := bson.D{{"$set", update}}
+	_, err := m.Client.GetProductCollection().UpdateOne(ctx, bson.M{"_id": id}, updateQuery)
 	if err != nil {
-		return errors.New("error in updating product")
+		return err
 	}
 
 	return nil

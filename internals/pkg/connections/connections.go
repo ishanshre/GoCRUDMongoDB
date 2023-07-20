@@ -18,11 +18,6 @@ type DB struct {
 	Client *mongo.Client
 }
 
-// return product collections from the mongo db
-func (db *DB) GetProductCollection() *mongo.Collection {
-	return db.Client.Database("myDB").Collection("products")
-}
-
 // establishes a connection to mongodb
 func ConnectToNoSql(dsn string) (DbInterface, error) {
 	client, err := NewDatabase(dsn)
@@ -32,6 +27,11 @@ func ConnectToNoSql(dsn string) (DbInterface, error) {
 	return &DB{
 		Client: client,
 	}, nil
+}
+
+// return product collections from the mongo db
+func (db *DB) GetProductCollection() *mongo.Collection {
+	return db.Client.Database("myDB").Collection("products")
 }
 
 // return a mongo db client
